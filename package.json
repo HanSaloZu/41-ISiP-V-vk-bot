@@ -1,0 +1,26 @@
+{
+  "name": "41-isip-v-vk-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HanSaloZu/41-ISiP-V-vk-bot.git"
+  },
+  "keywords": [
+    "vk",
+    "vk-api",
+    "vk-bot",
+    "nodejs"
+  ],
+  "author": "HanSaloZu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HanSaloZu/41-ISiP-V-vk-bot/issues"
+  },
+  "homepage": "https://github.com/HanSaloZu/41-ISiP-V-vk-bot#readme"
+}
