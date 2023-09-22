@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/HanSaloZu/41-ISiP-V-vk-bot/issues"
   },
-  "homepage": "https://github.com/HanSaloZu/41-ISiP-V-vk-bot#readme"
+  "homepage": "https://github.com/HanSaloZu/41-ISiP-V-vk-bot#readme",
+  "dependencies": {
+    "config": "^3.3.9"
+  }
 }
