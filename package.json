@@ -27,6 +27,7 @@
     "@vk-io/hear": "^1.1.1",
     "config": "^3.3.9",
     "node-cron": "^3.0.2",
+    "sequelize": "^6.33.0",
     "vk-io": "^4.8.3"
   },
   "devDependencies": {
