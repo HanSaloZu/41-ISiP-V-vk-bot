@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/HanSaloZu/41-ISiP-V-vk-bot#readme",
   "dependencies": {
+    "@vk-io/hear": "^1.1.1",
     "config": "^3.3.9",
     "vk-io": "^4.8.3"
   },
