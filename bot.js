@@ -1,5 +1,6 @@
 import { HearManager } from "@vk-io/hear";
 import config from "config";
+import cron from "node-cron";
 import { VK } from "vk-io";
 import db from "./db";
 import Peer from "./models/Peer";
@@ -67,6 +68,56 @@ hearManager.hear([/начать/i, "/start"], async (ctx) => {
       + `ID: ${peer.id}`
     });
   }
+});
+
+cron.schedule("*/5 * * * *", async () => {
+  const apiTopics = await service.api.board.getTopics({
+    group_id: config.get("groupId"),
+    order: 2,
+    count: 80,
+    extended: 1,
+    lang: 0
+  });
+  const dbTopicsIds = (await Topic.findAll({
+    order: ["createdAt"],
+    limit: 80
+  })).map((dbTopic) => dbTopic.id);
+  const newTopics = [];
+
+  apiTopics.items.forEach((topic) => {
+    if (!dbTopicsIds.includes(topic.id)) {
+      newTopics.unshift({
+        id: topic.id,
+        title: topic.title,
+        createdAt: new Date(topic.created * 1000),
+        createdBy: topic.created_by
+      });
+    }
+  });
+  await Topic.bulkCreate(newTopics);
+
+  const peersIds = (
+    await Peer.findAll({ where: { isNotificationEnabled: true } })
+  ).map((peer) => peer.id);
+
+  newTopics.forEach((newTopic) => {
+    const author = apiTopics.profiles.find(
+      (profile) => profile.id === newTopic.createdBy
+    );
+
+    const maxPeersPerRequest = 98;
+    for (let i = 0; i < peersIds.length; i += maxPeersPerRequest) {
+      bot.api.messages.send({
+        random_id: generateRandomInt32(),
+        peer_ids: peersIds.slice(i, i + maxPeersPerRequest),
+        message: "‼‼ Новое обсуждение ‼‼ \n\n"
+        + `Тема: ${newTopic.title} \n`
+        + `Автор: ${author.first_name} ${author.last_name} \n`
+        + `Дата и время: ${newTopic.createdAt.toLocaleString("ru-RU")} \n`
+        + `https://vk.com/topic-${config.get("groupId")}_${newTopic.id}`
+      });
+    }
+  });
 });
 
 db.sync({ alter: true });
