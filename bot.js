@@ -22,6 +22,10 @@ function generateRandomInt32() {
 
 bot.updates.on("message_new", hearManager.middleware);
 
+hearManager.hear("/ping", (ctx) => {
+  ctx.send("pong");
+});
+
 hearManager.hear([/начать/i, "/start"], async (ctx) => {
   const [peer, created] = await Peer.findOrCreate({
     where: { id: ctx.peerId },
