@@ -16,6 +16,10 @@ const bot = new VK({
 
 const hearManager = new HearManager();
 
+function generateRandomInt32() {
+  return parseInt(Math.random() * 2 ** 32, 10);
+}
+
 bot.updates.on("message_new", hearManager.middleware);
 
 db.sync({ alter: true });
