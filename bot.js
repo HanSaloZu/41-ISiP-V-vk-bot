@@ -27,6 +27,11 @@ bot.updates.on("message_allow", async (ctx) => {
   if (user) await user.update({ isNotificationEnabled: true });
 });
 
+bot.updates.on("message_deny", async (ctx) => {
+  const user = await Peer.findOne({ where: { id: ctx.userId } });
+  if (user) await user.update({ isNotificationEnabled: false });
+});
+
 hearManager.hear("/ping", (ctx) => {
   ctx.send("pong");
 });
