@@ -79,7 +79,7 @@ cron.schedule("*/5 * * * *", async () => {
     lang: 0
   });
   const dbTopicsIds = (await Topic.findAll({
-    order: ["createdAt"],
+    order: [["createdAt", "DESC"]],
     limit: 50
   })).map((dbTopic) => dbTopic.id);
   const newTopics = [];
