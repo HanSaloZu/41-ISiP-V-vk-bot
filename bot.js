@@ -74,13 +74,13 @@ cron.schedule("*/5 * * * *", async () => {
   const apiTopics = await service.api.board.getTopics({
     group_id: config.get("groupId"),
     order: 2,
-    count: 80,
+    count: 50,
     extended: 1,
     lang: 0
   });
   const dbTopicsIds = (await Topic.findAll({
     order: ["createdAt"],
-    limit: 80
+    limit: 50
   })).map((dbTopic) => dbTopic.id);
   const newTopics = [];
 
