@@ -83,6 +83,17 @@ cron.schedule("*/5 * * * *", async () => {
     limit: 50
   })).map((dbTopic) => dbTopic.id);
   const newTopics = [];
+  const oldestApiTopic = apiTopics.items[apiTopics.items.length - 1];
+
+  apiTopics.items = apiTopics.items.filter(
+    (apiTopic) => apiTopic.created >= oldestApiTopic.created
+  );
+
+  apiTopics.items.sort((firstTopic, secondTopic) => {
+    if (firstTopic.created < secondTopic.created) return 1;
+    if (firstTopic.created > secondTopic.created) return -1;
+    return 0;
+  });
 
   apiTopics.items.forEach((topic) => {
     if (!dbTopicsIds.includes(topic.id)) {
