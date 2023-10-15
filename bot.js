@@ -46,7 +46,12 @@ bot.updates.on("message_allow", async (ctx) => {
 
 bot.updates.on("message_deny", async (ctx) => {
   const user = await Peer.findOne({ where: { id: ctx.userId } });
-  if (user) await user.update({ isNotificationEnabled: false });
+  if (user) {
+    user.update({ isNotificationEnabled: false });
+    logger.info(`User:${ctx.userId} has denied messages`);
+  } else {
+    logger.warn(`User:${ctx.userId} not found during message_deny event`);
+  }
 });
 
 hearManager.hear("/ping", (ctx) => {
