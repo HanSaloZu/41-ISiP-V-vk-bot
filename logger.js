@@ -18,14 +18,14 @@ const fileRotateTransport = new winston.transports.DailyRotateFile({
 });
 
 const logger = winston.createLogger({
-  levels: winston.config.syslog.levels,
+  levels: winston.config.npm.levels,
   transports: [
     new winston.transports.Console({
       format: winston.format.combine(
         winston.format.colorize(),
         ...logFormats
       ),
-      level: process.env.NODE_ENV === "production" ? "error" : "debug"
+      level: process.env.NODE_ENV === "production" ? "warn" : "debug"
     }),
     fileRotateTransport
   ]
