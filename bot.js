@@ -79,15 +79,8 @@ hearManager.hear([/начать/i, "/start"], async (ctx) => {
       greeting += `Спасибо, ${user.first_name}, что используешь бота!`;
     } else greeting += "Спасибо, что используете бота!";
 
-    await ctx.send(greeting);
-
-    bot.api.messages.send({
-      random_id: generateRandomInt32(),
-      user_id: config.get("adminId"),
-      message: "🎉🎉 Новый клиент 🎉🎉\n\n"
-      + `Тип: ${peer.type}\n`
-      + `ID: ${peer.id}`
-    });
+    logger.info(`New peer has been created - ${peer.type}:${peer.id}`);
+    ctx.send(greeting);
   }
 });
 
