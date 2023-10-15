@@ -23,6 +23,16 @@ function generateRandomInt32() {
 
 bot.updates.on("message_new", hearManager.middleware);
 
+bot.updates.on("chat_invite_user", (ctx) => {
+  if (ctx.eventMemberId === config.get("groupPeerId")) {
+    ctx.send(
+      "Привет!\n\nЭтот бот отслеживает обсуждения в группе 41 ИСИП-В"
+    + " и автоматически уведомляет о появлении новых тем\n\n"
+    + "Для запуска бота нужно отправить в чат сообщение с текстом \"/start\""
+    );
+  }
+});
+
 bot.updates.on("message_allow", async (ctx) => {
   const user = await Peer.findOne({ where: { id: ctx.userId } });
   if (user) await user.update({ isNotificationEnabled: true });
