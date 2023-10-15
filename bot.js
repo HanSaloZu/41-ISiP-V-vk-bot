@@ -3,6 +3,7 @@ import config from "config";
 import cron from "node-cron";
 import { VK } from "vk-io";
 import db from "./db";
+import logger from "./logger";
 import Peer from "./models/Peer";
 import Topic from "./models/Topic";
 
@@ -35,7 +36,12 @@ bot.updates.on("chat_invite_user", (ctx) => {
 
 bot.updates.on("message_allow", async (ctx) => {
   const user = await Peer.findOne({ where: { id: ctx.userId } });
-  if (user) await user.update({ isNotificationEnabled: true });
+  if (user) {
+    user.update({ isNotificationEnabled: true });
+    logger.info(`User:${ctx.userId} has allowed messages`);
+  } else {
+    logger.warn(`User:${ctx.userId} not found during message_allow event`);
+  }
 });
 
 bot.updates.on("message_deny", async (ctx) => {
