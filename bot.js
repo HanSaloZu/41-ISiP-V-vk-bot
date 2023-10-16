@@ -175,4 +175,4 @@ cron.schedule("*/5 * * * *", async () => {
 });
 
 db.sync({ alter: true });
-bot.updates.start().catch(console.error);
+bot.updates.start().catch(logger.error);
