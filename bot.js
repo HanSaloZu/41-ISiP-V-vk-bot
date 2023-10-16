@@ -92,15 +92,17 @@ cron.schedule("*/5 * * * *", async () => {
     extended: 1,
     lang: 0
   });
-  const dbTopicsIds = (await Topic.findAll({
-    order: [["createdAt", "DESC"]],
-    limit: 50
-  })).map((dbTopic) => dbTopic.id);
-  const newTopics = [];
-  const oldestApiTopic = apiTopics.items[apiTopics.items.length - 1];
+  const fetchedTopicsCount = apiTopics.items.length;
+  const oldestApiTopic = apiTopics.items[fetchedTopicsCount - 1];
 
   apiTopics.items = apiTopics.items.filter(
     (apiTopic) => apiTopic.created >= oldestApiTopic.created
+  );
+
+  const recentApiTopic = apiTopics.items[0];
+  logger.info(
+    `${fetchedTopicsCount} topic(s) fetched (count after filtering: `
+    + `${apiTopics.items.length}; recent topic id: ${recentApiTopic.id})`
   );
 
   apiTopics.items.sort((firstTopic, secondTopic) => {
@@ -108,6 +110,12 @@ cron.schedule("*/5 * * * *", async () => {
     if (firstTopic.created > secondTopic.created) return -1;
     return 0;
   });
+
+  const newTopics = [];
+  const dbTopicsIds = (await Topic.findAll({
+    order: [["createdAt", "DESC"]],
+    limit: 50
+  })).map((dbTopic) => dbTopic.id);
 
   apiTopics.items.forEach((topic) => {
     if (!dbTopicsIds.includes(topic.id)) {
@@ -119,29 +127,50 @@ cron.schedule("*/5 * * * *", async () => {
       });
     }
   });
-  await Topic.bulkCreate(newTopics);
+  logger.info(
+    `Count of new topics found: ${newTopics.length} (`
+    + `ids: ${newTopics.map((newTopic) => newTopic.id).join()})`
+  );
+
+  const addedTopics = await Topic.bulkCreate(newTopics);
+  logger.info(
+    `Count of new topics added to DB: ${addedTopics.length} (`
+    + `ids: ${addedTopics.map((addedTopic) => addedTopic.id).join()})`
+  );
 
   const peersIds = (
     await Peer.findAll({ where: { isNotificationEnabled: true } })
   ).map((peer) => peer.id);
 
-  newTopics.forEach((newTopic) => {
+  newTopics.forEach(async (newTopic) => {
     const author = apiTopics.profiles.find(
       (profile) => profile.id === newTopic.createdBy
     );
 
+    const promisesOfSendings = [];
     const maxPeersPerRequest = 98;
     for (let i = 0; i < peersIds.length; i += maxPeersPerRequest) {
-      bot.api.messages.send({
+      const peersIdsSubarray = peersIds.slice(i, i + maxPeersPerRequest);
+      promisesOfSendings.push(bot.api.messages.send({
         random_id: generateRandomInt32(),
-        peer_ids: peersIds.slice(i, i + maxPeersPerRequest),
+        peer_ids: peersIdsSubarray,
         message: "‼‼ Новое обсуждение ‼‼ \n\n"
         + `Тема: ${newTopic.title} \n`
         + `Автор: ${author.first_name} ${author.last_name} \n`
         + `Дата и время: ${newTopic.createdAt.toLocaleString("ru-RU")} \n`
         + `https://vk.com/topic-${config.get("groupId")}_${newTopic.id}`
-      });
+      }));
     }
+
+    const resultsOfSendings = await Promise.all(promisesOfSendings);
+    const sentMessagesCount = resultsOfSendings.reduce(
+      (total, current) => total + current.length,
+      0
+    );
+    logger.info(
+      `Topic:${newTopic.id} sent to peer(s) (real/expected count of messages: `
+      + `${sentMessagesCount}/${peersIds.length})`
+    );
   });
 });
 
